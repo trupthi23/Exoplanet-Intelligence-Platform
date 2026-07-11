@@ -18,6 +18,6 @@ build/
 
 *.sqlite3
 
-data/raw/
+# data/raw/
 
 models/*.pkl
