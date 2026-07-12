@@ -1,10 +1,11 @@
-from dotenv import load_dotenv
-import os
+from pydantic_settings import BaseSettings
 
-load_dotenv()
 
-PROJECT_NAME = "Exoplanet Intelligence Platform"
+class Settings(BaseSettings):
+    DATABASE_URL: str
 
-API_VERSION = "1.0.0"
+    class Config:
+        env_file = ".env"
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+
+settings = Settings()
