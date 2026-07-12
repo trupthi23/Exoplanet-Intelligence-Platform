@@ -13,3 +13,4 @@ SessionLocal = sessionmaker(
 )
 
 Base = declarative_base()
+from app.models import planet
