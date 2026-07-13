@@ -5,6 +5,8 @@ import {
   Paper
 } from "@mui/material";
 
+import { Link } from "react-router-dom";
+
 function Sidebar() {
 
   return (
@@ -18,19 +20,19 @@ function Sidebar() {
 
       <List>
 
-        <ListItemButton>
+        <ListItemButton component={Link} to="/">
           <ListItemText primary="Dashboard" />
         </ListItemButton>
 
-        <ListItemButton>
+        <ListItemButton component={Link} to="/explorer">
           <ListItemText primary="Planet Explorer" />
         </ListItemButton>
 
-        <ListItemButton>
+        <ListItemButton component={Link} to="/compare">
           <ListItemText primary="Earth Comparison" />
         </ListItemButton>
 
-        <ListItemButton>
+        <ListItemButton component={Link} to="/habitability">
           <ListItemText primary="Habitability" />
         </ListItemButton>
 

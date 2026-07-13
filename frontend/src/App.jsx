@@ -1,84 +1,65 @@
-import { useEffect, useState } from "react";
-import { Box, Grid } from "@mui/material";
-
-import api from "./services/api";
+import { Box } from "@mui/material";
+import { Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/Navbar/Navbar";
 import Sidebar from "./components/Sidebar/Sidebar";
-import StatCard from "./components/Cards/StatCard";
+
+import Home from "./pages/Home";
+import Explorer from "./pages/Explorer";
+import Compare from "./pages/Compare";
+import Habitability from "./pages/Habitability";
+import PlanetDetails from "./pages/PlanetDetails";
+import NotFound from "./pages/NotFound";
 
 function App() {
-
-  const [summary, setSummary] = useState(null);
-
-  useEffect(() => {
-    api
-      .get("/analytics/summary")
-      .then((res) => setSummary(res.data));
-  }, []);
-
-  if (!summary) return <h2>Loading...</h2>;
-
   return (
-
     <>
       <Navbar />
 
-      <Box
-        sx={{
-          display: "flex"
-        }}
-      >
-
+      <Box sx={{ display: "flex" }}>
         <Sidebar />
 
         <Box
           sx={{
             flexGrow: 1,
-            p: 4
+            p: 4,
           }}
         >
+          <Routes>
+            <Route
+              path="/"
+              element={<Home />}
+            />
 
-          <Grid container spacing={3}>
+            <Route
+              path="/explorer"
+              element={<Explorer />}
+            />
 
-            <Grid size={{ xs: 12, md: 3 }}>
-              <StatCard
-                title="Planets"
-                value={summary.total_planets}
-              />
-            </Grid>
+            <Route
+              path="/compare"
+              element={<Compare />}
+            />
 
-            <Grid size={{ xs: 12, md: 3 }}>
-              <StatCard
-                title="Host Stars"
-                value={summary.total_host_stars}
-              />
-            </Grid>
+            <Route
+              path="/habitability"
+              element={<Habitability />}
+            />
 
-            <Grid size={{ xs: 12, md: 3 }}>
-              <StatCard
-                title="Average Radius"
-                value={summary.average_radius.toFixed(2)}
-              />
-            </Grid>
+            <Route
+              path="/planet/:id"
+              element={<PlanetDetails />}
+            />
 
-            <Grid size={{ xs: 12, md: 3 }}>
-              <StatCard
-                title="Average Star Temp"
-                value={`${summary.average_star_temperature.toFixed(0)} K`}
-              />
-            </Grid>
-
-          </Grid>
-
+            <Route
+              path="*"
+              element={<NotFound />}
+            />
+          </Routes>
         </Box>
-
       </Box>
-
     </>
-
   );
-
 }
 
 export default App;
