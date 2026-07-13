@@ -14,3 +14,10 @@ SessionLocal = sessionmaker(
 
 Base = declarative_base()
 from app.models import planet
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
