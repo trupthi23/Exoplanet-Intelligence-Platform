@@ -1,7 +1,7 @@
 from fastapi import FastAPI
-
 from app.api import health
 from app.api import planets
+from app.api import analytics
 
 app = FastAPI(
     title="Exoplanet Intelligence Platform",
@@ -11,6 +11,7 @@ app = FastAPI(
 
 app.include_router(health.router)
 app.include_router(planets.router)
+app.include_router(analytics.router)
 
 
 @app.get("/")
