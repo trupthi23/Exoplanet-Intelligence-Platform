@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react";
 import {
-  TextField,
   Typography,
+  TextField,
   MenuItem,
   Grid,
   CircularProgress,
-  Box,
+  Box
 } from "@mui/material";
 
 import api from "../services/api";
 import PlanetCard from "../components/Planet/PlanetCard";
 
 function Explorer() {
+
   const [planets, setPlanets] = useState([]);
 
   const [search, setSearch] = useState("");
@@ -23,6 +24,7 @@ function Explorer() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+
     setLoading(true);
 
     api
@@ -38,10 +40,11 @@ function Explorer() {
       .finally(() => {
         setLoading(false);
       });
+
   }, [search, method, year]);
 
   return (
-    <Box>
+    <>
 
       <Typography
         variant="h4"
@@ -49,8 +52,6 @@ function Explorer() {
       >
         Planet Explorer
       </Typography>
-
-      {/* Search Box */}
 
       <TextField
         fullWidth
@@ -60,14 +61,10 @@ function Explorer() {
         sx={{ mb: 3 }}
       />
 
-      {/* Filters */}
+      <Grid container spacing={2} sx={{ mb: 4 }}>
 
-      <Grid
-        container
-        spacing={2}
-        sx={{ mb: 4 }}
-      >
         <Grid item xs={12} md={6}>
+
           <TextField
             select
             fullWidth
@@ -75,21 +72,33 @@ function Explorer() {
             value={method}
             onChange={(e) => setMethod(e.target.value)}
           >
-            <MenuItem value="">All</MenuItem>
-            <MenuItem value="Transit">Transit</MenuItem>
+
+            <MenuItem value="">
+              All
+            </MenuItem>
+
+            <MenuItem value="Transit">
+              Transit
+            </MenuItem>
+
             <MenuItem value="Radial Velocity">
               Radial Velocity
             </MenuItem>
+
             <MenuItem value="Imaging">
               Imaging
             </MenuItem>
+
             <MenuItem value="Microlensing">
               Microlensing
             </MenuItem>
+
           </TextField>
+
         </Grid>
 
         <Grid item xs={12} md={6}>
+
           <TextField
             fullWidth
             type="number"
@@ -97,36 +106,47 @@ function Explorer() {
             value={year}
             onChange={(e) => setYear(e.target.value)}
           />
+
         </Grid>
+
       </Grid>
 
-      {/* Loading */}
-
       {loading && (
-        <Box sx={{ textAlign: "center", mt: 4 }}>
-          <CircularProgress />
-        </Box>
-      )}
 
-      {/* No Results */}
+        <Box sx={{ textAlign: "center", mt: 4 }}>
+
+          <CircularProgress />
+
+        </Box>
+
+      )}
 
       {!loading && planets.length === 0 && (
-        <Typography align="center">
+
+        <Typography>
+
           No planets found.
+
         </Typography>
+
       )}
 
-      {/* Planet Cards */}
-
       {!loading &&
+
         planets.map((planet) => (
+
           <PlanetCard
             key={planet.id}
             planet={planet}
           />
-        ))}
-    </Box>
+
+        ))
+
+      }
+
+    </>
   );
+
 }
 
 export default Explorer;
