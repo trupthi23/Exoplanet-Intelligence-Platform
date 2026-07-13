@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import Grid from "@mui/material/Grid";
-import Typography from "@mui/material/Typography";
-import Box from "@mui/material/Box";
+import { Box, Grid } from "@mui/material";
 
 import api from "./services/api";
+
+import Navbar from "./components/Navbar/Navbar";
+import Sidebar from "./components/Sidebar/Sidebar";
 import StatCard from "./components/Cards/StatCard";
 
 function App() {
@@ -11,58 +12,70 @@ function App() {
   const [summary, setSummary] = useState(null);
 
   useEffect(() => {
-    api.get("/analytics/summary")
-      .then(res => setSummary(res.data))
-      .catch(console.error);
+    api
+      .get("/analytics/summary")
+      .then((res) => setSummary(res.data));
   }, []);
 
-  if (!summary)
-    return <h2>Loading...</h2>;
+  if (!summary) return <h2>Loading...</h2>;
 
   return (
 
-    <Box sx={{ p: 5 }}>
+    <>
+      <Navbar />
 
-      <Typography
-        variant="h3"
-        gutterBottom
+      <Box
+        sx={{
+          display: "flex"
+        }}
       >
-        🚀 Exoplanet Intelligence Platform
-      </Typography>
 
-      <Grid container spacing={3}>
+        <Sidebar />
 
-        <Grid size={{ xs: 12, md: 3 }}>
-          <StatCard
-            title="Total Planets"
-            value={summary.total_planets}
-          />
-        </Grid>
+        <Box
+          sx={{
+            flexGrow: 1,
+            p: 4
+          }}
+        >
 
-        <Grid size={{ xs: 12, md: 3 }}>
-          <StatCard
-            title="Host Stars"
-            value={summary.total_host_stars}
-          />
-        </Grid>
+          <Grid container spacing={3}>
 
-        <Grid size={{ xs: 12, md: 3 }}>
-          <StatCard
-            title="Avg Radius"
-            value={summary.average_radius.toFixed(2)}
-          />
-        </Grid>
+            <Grid size={{ xs: 12, md: 3 }}>
+              <StatCard
+                title="Planets"
+                value={summary.total_planets}
+              />
+            </Grid>
 
-        <Grid size={{ xs: 12, md: 3 }}>
-          <StatCard
-            title="Avg Star Temp"
-            value={`${summary.average_star_temperature.toFixed(0)} K`}
-          />
-        </Grid>
+            <Grid size={{ xs: 12, md: 3 }}>
+              <StatCard
+                title="Host Stars"
+                value={summary.total_host_stars}
+              />
+            </Grid>
 
-      </Grid>
+            <Grid size={{ xs: 12, md: 3 }}>
+              <StatCard
+                title="Average Radius"
+                value={summary.average_radius.toFixed(2)}
+              />
+            </Grid>
 
-    </Box>
+            <Grid size={{ xs: 12, md: 3 }}>
+              <StatCard
+                title="Average Star Temp"
+                value={`${summary.average_star_temperature.toFixed(0)} K`}
+              />
+            </Grid>
+
+          </Grid>
+
+        </Box>
+
+      </Box>
+
+    </>
 
   );
 
