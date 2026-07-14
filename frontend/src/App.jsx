@@ -1,5 +1,4 @@
-import { Box } from "@mui/material";
-import { Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/Navbar/Navbar";
 import Sidebar from "./components/Sidebar/Sidebar";
@@ -13,23 +12,20 @@ import NotFound from "./pages/NotFound";
 
 function App() {
   return (
-    <>
+    <BrowserRouter>
       <Navbar />
 
-      <Box sx={{ display: "flex" }}>
+      <div style={{ display: "flex" }}>
         <Sidebar />
 
-        <Box
-          sx={{
-            flexGrow: 1,
-            p: 4,
+        <div
+          style={{
+            flex: 1,
+            padding: "30px",
           }}
         >
           <Routes>
-            <Route
-              path="/"
-              element={<Home />}
-            />
+            <Route path="/" element={<Home />} />
 
             <Route
               path="/explorer"
@@ -37,7 +33,12 @@ function App() {
             />
 
             <Route
-              path="/compare"
+              path="/planet/:id"
+              element={<PlanetDetails />}
+            />
+
+            <Route
+              path="/comparison/:id"
               element={<Compare />}
             />
 
@@ -47,18 +48,13 @@ function App() {
             />
 
             <Route
-              path="/planet/:id"
-              element={<PlanetDetails />}
-            />
-
-            <Route
               path="*"
               element={<NotFound />}
             />
           </Routes>
-        </Box>
-      </Box>
-    </>
+        </div>
+      </div>
+    </BrowserRouter>
   );
 }
 

@@ -8,16 +8,13 @@ import {
 import { Link } from "react-router-dom";
 
 function Sidebar() {
-
   return (
-
     <Paper
       sx={{
         height: "100vh",
         width: 220
       }}
     >
-
       <List>
 
         <ListItemButton component={Link} to="/">
@@ -28,7 +25,9 @@ function Sidebar() {
           <ListItemText primary="Planet Explorer" />
         </ListItemButton>
 
-        <ListItemButton component={Link} to="/compare">
+        {/* Earth Comparison is only available after selecting a planet */}
+
+        <ListItemButton disabled>
           <ListItemText primary="Earth Comparison" />
         </ListItemButton>
 
@@ -37,11 +36,8 @@ function Sidebar() {
         </ListItemButton>
 
       </List>
-
     </Paper>
-
   );
-
 }
 
 export default Sidebar;

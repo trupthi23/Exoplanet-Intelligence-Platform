@@ -4,6 +4,7 @@ import {
   Typography,
   Button
 } from "@mui/material";
+import { Link } from "react-router-dom";
 
 function PlanetCard({ planet }) {
   return (
@@ -31,8 +32,9 @@ function PlanetCard({ planet }) {
         </Typography>
 
         <Button
-          sx={{ mt: 2 }}
           variant="contained"
+          component={Link}
+          to={`/planet/${planet.id}`}
         >
           View Details
         </Button>
