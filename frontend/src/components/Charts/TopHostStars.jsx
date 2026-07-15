@@ -5,22 +5,19 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  CartesianGrid
 } from "recharts";
 
 function TopHostStars({ data }) {
   return (
     <ResponsiveContainer width="100%" height={350}>
       <BarChart data={data}>
-        <CartesianGrid strokeDasharray="3 3" />
-
         <XAxis dataKey="star" />
-
         <YAxis />
-
         <Tooltip />
-
-        <Bar dataKey="planets" />
+        <Bar
+          dataKey="planets"
+          fill="#10B981"
+        />
       </BarChart>
     </ResponsiveContainer>
   );

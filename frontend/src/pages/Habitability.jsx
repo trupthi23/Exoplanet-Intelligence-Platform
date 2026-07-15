@@ -1,5 +1,9 @@
 function Habitability() {
-    return <h2>Habitability Prediction (Coming Soon)</h2>;
+  return (
+    <h1 style={{ color: "white" }}>
+      Habitability Page
+    </h1>
+  );
 }
 
 export default Habitability;

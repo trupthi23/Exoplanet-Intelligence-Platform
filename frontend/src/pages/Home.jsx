@@ -1,117 +1,118 @@
 import { useEffect, useState } from "react";
-import { Grid, Box, Paper, Typography } from "@mui/material";
+
+import {
+  Box,
+  Grid,
+  Paper,
+  Typography,
+  CircularProgress,
+} from "@mui/material";
 
 import api from "../services/api";
 
 import StatCard from "../components/Cards/StatCard";
 import DiscoveryTimeline from "../components/Charts/DiscoveryTimeline";
-import DiscoveryMethods from "../components/Charts/DiscoveryMethods";
-import TopHostStars from "../components/Charts/TopHostStars";
 
 function Home() {
+  const [summary, setSummary] = useState(null);
+  const [timeline, setTimeline] = useState([]);
 
-    const [summary, setSummary] = useState(null);
-    const [timeline, setTimeline] = useState([]);
-    const [methods, setMethods] = useState([]);
-    const [stars, setStars] = useState([]);
+  useEffect(() => {
+    Promise.all([
+      api.get("/analytics/summary"),
+      api.get("/analytics/discovery-timeline"),
+    ])
+      .then(([summaryRes, timelineRes]) => {
+        setSummary(summaryRes.data);
+        setTimeline(timelineRes.data);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }, []);
 
-    useEffect(() => {
-
-        api.get("/analytics/summary")
-            .then((res) => setSummary(res.data));
-
-        api.get("/analytics/discovery-timeline")
-            .then((res) => setTimeline(res.data));
-
-        api.get("/analytics/discovery-methods")
-            .then((res) => setMethods(res.data));
-
-        api.get("/analytics/top-host-stars")
-            .then((res) => setStars(res.data));
-
-    }, []);
-
-    if (!summary)
-        return <h2>Loading...</h2>;
-
+  if (!summary) {
     return (
-
-        <>
-
-            {/* KPI Cards */}
-
-            <Grid container spacing={3}>
-
-                <Grid size={{ xs: 12, md: 3 }}>
-                    <StatCard
-                        title="Planets"
-                        value={summary.total_planets}
-                    />
-                </Grid>
-
-                <Grid size={{ xs: 12, md: 3 }}>
-                    <StatCard
-                        title="Host Stars"
-                        value={summary.total_host_stars}
-                    />
-                </Grid>
-
-                <Grid size={{ xs: 12, md: 3 }}>
-                    <StatCard
-                        title="Average Radius"
-                        value={summary.average_radius.toFixed(2)}
-                    />
-                </Grid>
-
-                <Grid size={{ xs: 12, md: 3 }}>
-                    <StatCard
-                        title="Average Star Temperature"
-                        value={`${summary.average_star_temperature.toFixed(0)} K`}
-                    />
-                </Grid>
-
-            </Grid>
-
-            {/* Charts */}
-
-            <Box sx={{ mt: 5 }}>
-
-                <Paper sx={{ p: 3, mb: 4 }}>
-
-                    <Typography variant="h6" gutterBottom>
-                        Discovery Timeline
-                    </Typography>
-
-                    <DiscoveryTimeline data={timeline} />
-
-                </Paper>
-
-                <Paper sx={{ p: 3, mb: 4 }}>
-
-                    <Typography variant="h6" gutterBottom>
-                        Discovery Methods
-                    </Typography>
-
-                    <DiscoveryMethods data={methods} />
-
-                </Paper>
-
-                <Paper sx={{ p: 3 }}>
-
-                    <Typography variant="h6" gutterBottom>
-                        Top Host Stars
-                    </Typography>
-
-                    <TopHostStars data={stars} />
-
-                </Paper>
-
-            </Box>
-
-        </>
-
+      <Box
+        display="flex"
+        justifyContent="center"
+        mt={10}
+      >
+        <CircularProgress />
+      </Box>
     );
+  }
 
+  return (
+    <Box>
+
+      <Typography
+        variant="h3"
+        gutterBottom
+      >
+        🚀 Exoplanet Intelligence Dashboard
+      </Typography>
+
+      <Typography
+        color="text.secondary"
+        sx={{ mb: 4 }}
+      >
+        NASA Exoplanet Archive Analytics
+      </Typography>
+
+      <Grid container spacing={3}>
+
+        <Grid item xs={12} md={3}>
+          <StatCard
+            title="Total Planets"
+            value={summary.total_planets}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={3}>
+          <StatCard
+            title="Host Stars"
+            value={summary.total_host_stars}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={3}>
+          <StatCard
+            title="Average Radius"
+            value={summary.average_radius}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={3}>
+          <StatCard
+            title="Average Star Temperature"
+            value={summary.average_star_temperature}
+          />
+        </Grid>
+
+      </Grid>
+
+      <Paper
+        sx={{
+          p: 3,
+          mt: 5,
+        }}
+      >
+        <Typography
+          variant="h5"
+          gutterBottom
+        >
+          📈 Discovery Timeline
+        </Typography>
+
+        <DiscoveryTimeline
+          data={timeline}
+        />
+
+      </Paper>
+
+    </Box>
+  );
 }
 
 export default Home;
