@@ -11,22 +11,33 @@ app = FastAPI(
     description="NASA Exoplanet Discovery & Habitability Intelligence Platform"
 )
 
-# CORS 
+# CORS Configuration
+
+origins = [
+    # Development
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+
+    # Production Preview
+    "http://localhost:4173",
+    "http://127.0.0.1:4173",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173"
-    ],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# Routers
 
 app.include_router(health.router)
 app.include_router(planets.router)
 app.include_router(analytics.router)
+
+# Root Endpoint
 
 @app.get("/")
 def home():
