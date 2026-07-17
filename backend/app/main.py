@@ -14,13 +14,16 @@ app = FastAPI(
 # CORS Configuration
 
 origins = [
-    # Development
+    # Local Development
     "http://localhost:5173",
     "http://127.0.0.1:5173",
 
-    # Production Preview
+    # Vite Preview
     "http://localhost:4173",
     "http://127.0.0.1:4173",
+
+    # Production (Vercel)
+    "https://exoplanet-intelligence-platform.vercel.app",
 ]
 
 app.add_middleware(
@@ -31,7 +34,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Routers
+# API Routers
 
 app.include_router(health.router)
 app.include_router(planets.router)
@@ -42,5 +45,6 @@ app.include_router(analytics.router)
 @app.get("/")
 def home():
     return {
-        "message": "Welcome to Exoplanet Intelligence Platform"
+        "message": "Welcome to Exoplanet Intelligence Platform",
+        "status": "Running"
     }
