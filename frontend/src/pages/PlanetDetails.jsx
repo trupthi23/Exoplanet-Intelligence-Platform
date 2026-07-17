@@ -1,131 +1,300 @@
-import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
 
 import {
   Box,
-  Card,
-  CardContent,
   Typography,
-  CircularProgress,
-  Divider,
+  Grid,
+  Chip,
+  Stack,
   Button,
 } from "@mui/material";
 
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+
 import api from "../services/api";
 
+import LoadingScreen from "../components/Common/LoadingScreen";
+
+import PlanetStatCard from "../components/Planet/PlanetStatCard";
+import PlanetOverview from "../components/Planet/PlanetOverview";
+import HabitabilityCard from "../components/Planet/HabitabilityCard";
+import HabitabilityExplanation from "../components/Planet/HabitabilityExplanation";
+import HabitabilityBreakdown from "../components/Planet/HabitabilityBreakdown";
+import PlanetIntelligenceCard from "../components/Planet/PlanetIntelligenceCard";
+import SimilarPlanets from "../components/SimilarPlanets/SimilarPlanets";
+
+import { calculateHabitability } from "../utils/habitabilityScore";
+import { generatePlanetIntelligence } from "../utils/planetIntelligence";
+import { generateHabitabilityExplanation } from "../utils/habitabilityExplanation";
+
+import { exportPlanetReport } from "../utils/pdfGenerator";
+
 function PlanetDetails() {
+
   const { id } = useParams();
-  const navigate = useNavigate();
 
   const [planet, setPlanet] = useState(null);
+  const [similarPlanets, setSimilarPlanets] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get(`/planets/${id}`)
-      .then((res) => setPlanet(res.data));
+
+    async function loadPlanet() {
+
+      try {
+
+        setLoading(true);
+
+        const planetRes =
+          await api.get(`/planets/${id}`);
+
+        setPlanet(planetRes.data);
+
+        const similarRes =
+          await api.get(`/planets/${id}/similar`);
+
+        setSimilarPlanets(similarRes.data);
+
+      } catch (err) {
+
+        console.error(err);
+
+      } finally {
+
+        setLoading(false);
+
+      }
+
+    }
+
+    loadPlanet();
+
   }, [id]);
 
-  if (!planet) {
+  if (loading) {
+
     return (
-      <Box sx={{ textAlign: "center", mt: 8 }}>
-        <CircularProgress />
-      </Box>
+      <LoadingScreen
+        title="Loading Planet Intelligence..."
+        subtitle="Analyzing planetary characteristics..."
+      />
     );
+
   }
 
+  if (!planet) {
+
+    return (
+      <Typography color="error">
+        Planet not found.
+      </Typography>
+    );
+
+  }
+
+  // ==========================
+  // Memoized Calculations
+  // ==========================
+
+  const habitabilityScore = useMemo(
+    () => calculateHabitability(planet),
+    [planet]
+  );
+
+  const intelligence = useMemo(
+    () => generatePlanetIntelligence(planet),
+    [planet]
+  );
+
+  const explanation = useMemo(
+    () => generateHabitabilityExplanation(planet),
+    [planet]
+  );
+
   return (
+
     <Box>
 
-      <Typography variant="h3" gutterBottom>
-        🪐 {planet.planet_name}
-      </Typography>
+      <Box
+        mb={5}
+        display="flex"
+        justifyContent="space-between"
+        alignItems="flex-start"
+        flexWrap="wrap"
+        gap={3}
+      >
 
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
+        <Box>
 
-          <Typography variant="h5">
-            Planet Information
-          </Typography>
-
-          <Divider sx={{ my: 2 }} />
-
-          <Typography>
-            <b>Host Star:</b> {planet.host_star}
-          </Typography>
-
-          <Typography>
-            <b>Discovery Method:</b> {planet.discovery_method}
-          </Typography>
-
-          <Typography>
-            <b>Discovery Year:</b> {planet.discovery_year}
-          </Typography>
-
-          <Typography>
-            <b>Radius:</b> {planet.planet_radius_earth}
-          </Typography>
-
-          <Typography>
-            <b>Mass:</b> {planet.planet_mass_earth}
-          </Typography>
-
-          <Typography>
-            <b>Temperature:</b> {planet.equilibrium_temperature}
-          </Typography>
-
-          <Typography>
-            <b>Orbital Period:</b> {planet.orbital_period_days}
-          </Typography>
-
-        </CardContent>
-      </Card>
-
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-
-          <Typography variant="h5">
-            🌍 Earth Comparison
-          </Typography>
-
-          <Divider sx={{ my: 2 }} />
-
-          <Button
-            variant="contained"
-            onClick={() => navigate(`/compare/${planet.id}`)}
+          <Typography
+            variant="h3"
+            fontWeight={700}
+            gutterBottom
           >
-            Compare With Earth
-          </Button>
-
-        </CardContent>
-      </Card>
-
-      {/* Similar Planets */}
-
-      <Card>
-        <CardContent>
-
-          <Typography variant="h5">
-            🤖 Similar Exoplanets
+            🪐 {planet.planet_name}
           </Typography>
 
-          <Divider sx={{ my: 2 }} />
-
-          <Typography color="text.secondary">
-            Find planets with similar physical characteristics using our ML recommendation engine.
-          </Typography>
-
-          <Button
-            variant="contained"
-            sx={{ mt: 3 }}
-            onClick={() => navigate(`/planet/${planet.id}/similar`)}
+          <Typography
+            color="text.secondary"
+            sx={{ mb: 2 }}
           >
-            View Recommendations
-          </Button>
+            Planet Intelligence Report
+          </Typography>
 
-        </CardContent>
-      </Card>
+          <Stack
+            direction="row"
+            spacing={2}
+            flexWrap="wrap"
+          >
+
+            <Chip
+              color="primary"
+              label={planet.discovery_method}
+            />
+
+            <Chip
+              color="secondary"
+              label={`Discovered ${planet.discovery_year}`}
+            />
+
+          </Stack>
+
+        </Box>
+
+        <Button
+          variant="contained"
+          size="large"
+          startIcon={<PictureAsPdfIcon />}
+          onClick={() =>
+            exportPlanetReport(
+              planet,
+              habitabilityScore,
+              explanation
+            )
+          }
+          sx={{
+            borderRadius: 3,
+            px: 3,
+            py: 1.4,
+            fontWeight: 700,
+          }}
+        >
+          Export Report
+        </Button>
+
+      </Box>
+
+      <PlanetIntelligenceCard
+        intelligence={intelligence}
+      />
+
+      <PlanetOverview
+        planet={planet}
+      />
+
+      <HabitabilityCard
+        score={habitabilityScore}
+      />
+
+      <HabitabilityExplanation
+        explanation={explanation}
+      />
+
+      <HabitabilityBreakdown
+        planet={planet}
+      />
+
+      <Grid container spacing={3} sx={{ mt: 2 }}>
+
+        <Grid item xs={12} md={4}>
+          <PlanetStatCard
+            title="Discovery Method"
+            value={planet.discovery_method}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <PlanetStatCard
+            title="Discovery Year"
+            value={planet.discovery_year}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <PlanetStatCard
+            title="Host Star"
+            value={planet.host_star}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <PlanetStatCard
+            title="Planet Mass"
+            value={planet.planet_mass_earth}
+            unit="Earth Masses"
+          />
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <PlanetStatCard
+            title="Planet Radius"
+            value={planet.planet_radius_earth}
+            unit="Earth Radii"
+          />
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <PlanetStatCard
+            title="Orbital Period"
+            value={planet.orbital_period_days}
+            unit="Days"
+          />
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <PlanetStatCard
+            title="Distance"
+            value={planet.distance_pc}
+            unit="pc"
+          />
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <PlanetStatCard
+            title="Star Mass"
+            value={planet.star_mass}
+            unit="Solar Masses"
+          />
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <PlanetStatCard
+            title="Star Radius"
+            value={planet.star_radius}
+            unit="Solar Radii"
+          />
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <PlanetStatCard
+            title="Star Temperature"
+            value={planet.star_temperature}
+            unit="K"
+          />
+        </Grid>
+
+      </Grid>
+
+      <SimilarPlanets
+        currentPlanet={planet}
+        planets={similarPlanets}
+      />
 
     </Box>
+
   );
+
 }
 
 export default PlanetDetails;

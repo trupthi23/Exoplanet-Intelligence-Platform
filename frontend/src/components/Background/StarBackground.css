@@ -1,0 +1,101 @@
+.star-background {
+
+    position: fixed;
+
+    inset: 0;
+
+    overflow: hidden;
+
+    z-index: -10;
+
+    pointer-events: none;
+
+    background:
+        radial-gradient(circle at top,
+        rgba(59,130,246,.12),
+        transparent 45%),
+
+        linear-gradient(
+        to bottom,
+        #020617,
+        #030712 40%,
+        #020617
+        );
+
+}
+
+/* ------------------------- */
+
+.star {
+
+    position: absolute;
+
+    display: block;
+
+    border-radius: 50%;
+
+    background: white;
+
+    opacity: .75;
+
+    animation: twinkle infinite ease-in-out;
+
+    box-shadow:
+
+        0 0 4px white,
+
+        0 0 8px rgba(255,255,255,.8),
+
+        0 0 12px rgba(59,130,246,.45);
+
+}
+
+/* ------------------------- */
+
+@keyframes twinkle {
+
+    0% {
+
+        transform:
+            scale(.5);
+
+        opacity:
+            .15;
+
+    }
+
+    25% {
+
+        opacity:
+            .8;
+
+    }
+
+    50% {
+
+        transform:
+            scale(1);
+
+        opacity:
+            1;
+
+    }
+
+    75% {
+
+        opacity:
+            .7;
+
+    }
+
+    100% {
+
+        transform:
+            scale(.5);
+
+        opacity:
+            .15;
+
+    }
+
+}

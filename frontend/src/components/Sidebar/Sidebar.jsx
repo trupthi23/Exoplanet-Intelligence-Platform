@@ -5,6 +5,7 @@ import {
   ListItemIcon,
   ListItemText,
   Typography,
+  Box,
 } from "@mui/material";
 
 import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -44,24 +45,58 @@ function Sidebar() {
     <Paper
       elevation={0}
       sx={{
-        width: 240,
+        width: {
+          xs: 0,
+          md: 220,
+          lg: 240,
+        },
+
+        display: {
+          xs: "none",
+          md: "block",
+        },
+
         minHeight: "100vh",
-        backgroundColor: "#111827",
+
+        background:
+          "linear-gradient(180deg,#0F172A,#111827)",
+
+        borderRight: "1px solid rgba(255,255,255,.08)",
+
         borderRadius: 0,
+
+        overflow: "hidden",
       }}
     >
-      <Typography
-        variant="h6"
+      <Box
         sx={{
           p: 3,
-          color: "#38BDF8",
-          fontWeight: "bold",
+          borderBottom:
+            "1px solid rgba(255,255,255,.08)",
         }}
       >
-        Navigation
-      </Typography>
+        <Typography
+          variant="h6"
+          sx={{
+            color: "#38BDF8",
+            fontWeight: 700,
+          }}
+        >
+          Navigation
+        </Typography>
 
-      <List>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "#94A3B8",
+            mt: 0.5,
+          }}
+        >
+          Explore the galaxy
+        </Typography>
+      </Box>
+
+      <List sx={{ p: 2 }}>
         {menu.map((item) => {
           const active = location.pathname === item.path;
 
@@ -71,9 +106,13 @@ function Sidebar() {
               component={Link}
               to={item.path}
               sx={{
-                mx: 1,
-                mb: 1,
-                borderRadius: 2,
+                mb: 1.5,
+
+                borderRadius: 3,
+
+                color: "white",
+
+                transition: ".25s",
 
                 backgroundColor: active
                   ? "#2563EB"
@@ -83,6 +122,8 @@ function Sidebar() {
                   backgroundColor: active
                     ? "#2563EB"
                     : "#1E293B",
+
+                  transform: "translateX(5px)",
                 },
               }}
             >
@@ -95,7 +136,12 @@ function Sidebar() {
                 {item.icon}
               </ListItemIcon>
 
-              <ListItemText primary={item.text} />
+              <ListItemText
+                primary={item.text}
+                primaryTypographyProps={{
+                  fontWeight: active ? 700 : 500,
+                }}
+              />
             </ListItemButton>
           );
         })}
