@@ -31,7 +31,6 @@ import { generateHabitabilityExplanation } from "../utils/habitabilityExplanatio
 import { exportPlanetReport } from "../utils/pdfGenerator";
 
 function PlanetDetails() {
-
   const { id } = useParams();
 
   const [planet, setPlanet] = useState(null);
@@ -39,82 +38,67 @@ function PlanetDetails() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-
     async function loadPlanet() {
-
       try {
-
         setLoading(true);
 
-        const planetRes =
-          await api.get(`/planets/${id}`);
-
+        const planetRes = await api.get(`/planets/${id}`);
         setPlanet(planetRes.data);
 
-        const similarRes =
-          await api.get(`/planets/${id}/similar`);
-
+        const similarRes = await api.get(`/planets/${id}/similar`);
         setSimilarPlanets(similarRes.data);
-
       } catch (err) {
-
         console.error(err);
-
       } finally {
-
         setLoading(false);
-
       }
-
     }
 
     loadPlanet();
-
   }, [id]);
 
-  if (loading) {
+  // ======================================
+  // Memoized Calculations 
+  // ======================================
 
+  const habitabilityScore = useMemo(() => {
+    if (!planet) return 0;
+    return calculateHabitability(planet);
+  }, [planet]);
+
+  const intelligence = useMemo(() => {
+    if (!planet) return null;
+    return generatePlanetIntelligence(planet);
+  }, [planet]);
+
+  const explanation = useMemo(() => {
+    if (!planet) return null;
+    return generateHabitabilityExplanation(planet);
+  }, [planet]);
+
+  // ======================================
+
+  if (loading) {
     return (
       <LoadingScreen
         title="Loading Planet Intelligence..."
         subtitle="Analyzing planetary characteristics..."
       />
     );
-
   }
 
   if (!planet) {
-
     return (
       <Typography color="error">
         Planet not found.
       </Typography>
     );
-
   }
 
-  // ==========================
-  // Memoized Calculations
-  // ==========================
-
-  const habitabilityScore = useMemo(
-    () => calculateHabitability(planet),
-    [planet]
-  );
-
-  const intelligence = useMemo(
-    () => generatePlanetIntelligence(planet),
-    [planet]
-  );
-
-  const explanation = useMemo(
-    () => generateHabitabilityExplanation(planet),
-    [planet]
-  );
-
   return (
-
     <Box>
+
+      {/* Hero */}
 
       <Box
         mb={5}
@@ -292,9 +276,7 @@ function PlanetDetails() {
       />
 
     </Box>
-
   );
-
 }
 
 export default PlanetDetails;
