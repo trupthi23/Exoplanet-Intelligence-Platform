@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   Box,
@@ -17,28 +17,31 @@ import ExplorerToolbar from "../components/Explorer/ExplorerToolbar";
 import ExplorerTable from "../components/Explorer/ExplorerTable";
 import ExplorerPagination from "../components/Explorer/ExplorerPagination";
 import ExplorerStats from "../components/Explorer/ExplorerStats";
-
 import LoadingScreen from "../components/Common/LoadingScreen";
 
 import { exportPlanetsCSV } from "../utils/csvGenerator";
-
-const ROWS_PER_PAGE = 25;
 
 function Explorer() {
 
   const navigate = useNavigate();
 
   const [planets, setPlanets] = useState([]);
-  const [filtered, setFiltered] = useState([]);
 
   const [loading, setLoading] = useState(true);
 
-  const [search, setSearch] = useState("");
-  const [method, setMethod] = useState("");
-  const [year, setYear] = useState("");
-  const [hostStar, setHostStar] = useState("");
-
   const [page, setPage] = useState(1);
+
+  const [total, setTotal] = useState(0);
+
+  const [totalPages, setTotalPages] = useState(1);
+
+  const [search, setSearch] = useState("");
+
+  const [method, setMethod] = useState("");
+
+  const [year, setYear] = useState("");
+
+  const [hostStar, setHostStar] = useState("");
 
   const [orderBy, setOrderBy] =
     useState("planet_name");
@@ -46,94 +49,67 @@ function Explorer() {
   const [order, setOrder] =
     useState("asc");
 
+  const [methods, setMethods] = useState([]);
+
+  const [years, setYears] = useState([]);
+
+  // -----------------------------
+  // Load planets from backend
+  // -----------------------------
+
   useEffect(() => {
 
+    setLoading(true);
+
     api
-      .get("/planets")
+      .get("/planets/search", {
+
+        params: {
+
+          page,
+
+          limit: 25,
+
+          sort: orderBy,
+
+          order,
+
+          ...(search.trim() && {
+            name: search.trim(),
+          }),
+
+          ...(method && {
+            method,
+          }),
+
+          ...(year !== "" && {
+            year: Number(year),
+          }),
+
+          ...(hostStar.trim() && {
+            host_star: hostStar.trim(),
+          }),
+
+        },
+
+      })
+
       .then((res) => {
 
         setPlanets(res.data.data);
 
+        setTotal(res.data.total);
+
+        setTotalPages(res.data.total_pages);
+
       })
+
       .catch(console.error)
+
       .finally(() => setLoading(false));
 
-  }, []);
-
-  useEffect(() => {
-
-    let result = [...planets];
-
-    if (search) {
-
-      result = result.filter((planet) =>
-        planet.planet_name
-          ?.toLowerCase()
-          .includes(search.toLowerCase())
-      );
-
-    }
-
-    if (method) {
-
-      result = result.filter(
-        (planet) =>
-          planet.discovery_method === method
-      );
-
-    }
-
-    if (year) {
-
-      result = result.filter(
-        (planet) =>
-          String(planet.discovery_year) === year
-      );
-
-    }
-
-    if (hostStar) {
-
-      result = result.filter((planet) =>
-        planet.host_star
-          ?.toLowerCase()
-          .includes(hostStar.toLowerCase())
-      );
-
-    }
-
-    result.sort((a, b) => {
-
-      const first = a[orderBy];
-      const second = b[orderBy];
-
-      if (first == null) return 1;
-      if (second == null) return -1;
-
-      if (typeof first === "number") {
-
-        return order === "asc"
-          ? first - second
-          : second - first;
-
-      }
-
-      return order === "asc"
-        ? String(first).localeCompare(
-            String(second)
-          )
-        : String(second).localeCompare(
-            String(first)
-          );
-
-    });
-
-    setFiltered(result);
-
-    setPage(1);
-
   }, [
-    planets,
+    page,
     search,
     method,
     year,
@@ -142,45 +118,56 @@ function Explorer() {
     order,
   ]);
 
-  const methods = [
+  // -----------------------------
+  // Load dropdown values
+  // -----------------------------
 
-    ...new Set(
+  useEffect(() => {
 
-      planets
-        .map((p) => p.discovery_method)
-        .filter(Boolean)
+    api
+      .get("/planets", {
 
-    ),
+        params: {
 
-  ].sort();
+          page: 1,
 
-  const years = [
+          limit: 500,
 
-    ...new Set(
+        },
 
-      planets
-        .map((p) => p.discovery_year)
-        .filter(Boolean)
+      })
 
-    ),
+      .then((res) => {
 
-  ].sort((a, b) => b - a);
+        const all = res.data.data;
 
-  const totalPages = Math.ceil(
-    filtered.length / ROWS_PER_PAGE
-  );
+        setMethods(
 
-  const currentPageData = useMemo(() => {
+          [...new Set(
 
-    const start =
-      (page - 1) * ROWS_PER_PAGE;
+            all
+              .map((p) => p.discovery_method)
+              .filter(Boolean)
 
-    return filtered.slice(
-      start,
-      start + ROWS_PER_PAGE
-    );
+          )].sort()
 
-  }, [filtered, page]);
+        );
+
+        setYears(
+
+          [...new Set(
+
+            all
+              .map((p) => p.discovery_year)
+              .filter(Boolean)
+
+          )].sort((a, b) => b - a)
+
+        );
+
+      });
+
+  }, []);
 
   function handleSort(column) {
 
@@ -230,19 +217,18 @@ function Explorer() {
         color="text.secondary"
         sx={{ mb: 4 }}
       >
-        Search, filter and explore
-        NASA's confirmed exoplanets.
+        Search, filter and explore NASA's confirmed exoplanets.
       </Typography>
 
       <ExplorerStats
 
-        totalResults={filtered.length}
+        totalResults={total}
 
         totalMethods={methods.length}
 
         totalStars={
           new Set(
-            filtered
+            planets
               .map((p) => p.host_star)
               .filter(Boolean)
           ).size
@@ -260,25 +246,58 @@ function Explorer() {
       />
 
       <Stack
+
         direction="row"
+
         justifyContent="space-between"
+
         alignItems="center"
+
         sx={{ mb: 3 }}
+
       >
 
         <ExplorerToolbar
 
           search={search}
-          setSearch={setSearch}
+
+          setSearch={(value) => {
+
+            setSearch(value);
+
+            setPage(1);
+
+          }}
 
           method={method}
-          setMethod={setMethod}
+
+          setMethod={(value) => {
+
+            setMethod(value);
+
+            setPage(1);
+
+          }}
 
           year={year}
-          setYear={setYear}
+
+          setYear={(value) => {
+
+            setYear(value);
+
+            setPage(1);
+
+          }}
 
           hostStar={hostStar}
-          setHostStar={setHostStar}
+
+          setHostStar={(value) => {
+
+            setHostStar(value);
+
+            setPage(1);
+
+          }}
 
           methods={methods}
 
@@ -293,16 +312,23 @@ function Explorer() {
           startIcon={<DownloadIcon />}
 
           onClick={() =>
-            exportPlanetsCSV(filtered)
+            exportPlanetsCSV(planets)
           }
 
           sx={{
+
             ml: 3,
+
             whiteSpace: "nowrap",
+
             borderRadius: 3,
+
             px: 3,
+
             py: 1.3,
+
             fontWeight: 700,
+
           }}
 
         >
@@ -313,13 +339,18 @@ function Explorer() {
 
       </Stack>
 
-      {filtered.length === 0 ? (
+      {planets.length === 0 ? (
 
         <Box
+
           sx={{
+
             py: 10,
+
             textAlign: "center",
+
           }}
+
         >
 
           <Typography
@@ -337,12 +368,10 @@ function Explorer() {
             No planets found
           </Typography>
 
-          <Typography
-            color="text.secondary"
-          >
-            Try changing your search,
-            host star, discovery
-            method or year.
+          <Typography color="text.secondary">
+
+            Try changing your filters.
+
           </Typography>
 
         </Box>
@@ -353,7 +382,7 @@ function Explorer() {
 
           <ExplorerTable
 
-            planets={currentPageData}
+            planets={planets}
 
             navigate={navigate}
 

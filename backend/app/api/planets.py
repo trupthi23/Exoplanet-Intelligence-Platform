@@ -125,9 +125,9 @@ def search_planets(
         )
         params["method"] = method
 
-    if year:
+    if year is not None:
         where.append(
-            "discovery_year=:year"
+            "discovery_year = :year"
         )
         params["year"] = year
 
