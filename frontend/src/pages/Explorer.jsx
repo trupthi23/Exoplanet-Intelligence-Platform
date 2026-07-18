@@ -5,6 +5,7 @@ import {
   Typography,
   Button,
   Stack,
+  CircularProgress,
 } from "@mui/material";
 
 import DownloadIcon from "@mui/icons-material/Download";
@@ -27,7 +28,9 @@ function Explorer() {
 
   const [planets, setPlanets] = useState([]);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+
+  const [initialLoading, setInitialLoading] = useState(true);
 
   const [page, setPage] = useState(1);
 
@@ -43,70 +46,69 @@ function Explorer() {
 
   const [hostStar, setHostStar] = useState("");
 
-  const [orderBy, setOrderBy] =
-    useState("planet_name");
+  const [orderBy, setOrderBy] = useState("planet_name");
 
-  const [order, setOrder] =
-    useState("asc");
+  const [order, setOrder] = useState("asc");
 
   const [methods, setMethods] = useState([]);
 
   const [years, setYears] = useState([]);
 
-  // -----------------------------
-  // Load planets from backend
-  // -----------------------------
-
   useEffect(() => {
 
     setLoading(true);
 
-    api
-      .get("/planets/search", {
+    api.get("/planets/search", {
 
-        params: {
+      params: {
 
-          page,
+        page,
 
-          limit: 25,
+        limit: 25,
 
-          sort: orderBy,
+        sort: orderBy,
 
-          order,
+        order,
 
-          ...(search.trim() && {
-            name: search.trim(),
-          }),
+        ...(search.trim() && {
+          name: search.trim(),
+        }),
 
-          ...(method && {
-            method,
-          }),
+        ...(method && {
+          method,
+        }),
 
-          ...(year !== "" && {
-            year: Number(year),
-          }),
+        ...(year !== "" && {
+          year: Number(year),
+        }),
 
-          ...(hostStar.trim() && {
-            host_star: hostStar.trim(),
-          }),
+        ...(hostStar.trim() && {
+          host_star: hostStar.trim(),
+        }),
 
-        },
+      },
 
-      })
+    })
 
-      .then((res) => {
+    .then((res) => {
 
-        setPlanets(res.data.data);
+      setPlanets(res.data.data);
 
-        setTotal(res.data.total);
+      setTotal(res.data.total);
 
-        setTotalPages(res.data.total_pages);
+      setTotalPages(res.data.total_pages);
 
-      })
+    })
 
-      .catch(console.error)
+    .catch(console.error)
 
-      .finally(() => setLoading(false));
+    .finally(() => {
+
+      setLoading(false);
+
+      setInitialLoading(false);
+
+    });
 
   }, [
     page,
@@ -118,54 +120,46 @@ function Explorer() {
     order,
   ]);
 
-  // -----------------------------
-  // Load dropdown values
-  // -----------------------------
-
   useEffect(() => {
 
-    api
-      .get("/planets", {
+    api.get("/planets", {
 
-        params: {
+      params: {
+        page: 1,
+        limit: 500,
+      },
 
-          page: 1,
+    })
 
-          limit: 500,
+    .then((res) => {
 
-        },
+      const all = res.data.data;
 
-      })
+      setMethods(
 
-      .then((res) => {
+        [...new Set(
 
-        const all = res.data.data;
+          all
+            .map((p) => p.discovery_method)
+            .filter(Boolean)
 
-        setMethods(
+        )].sort()
 
-          [...new Set(
+      );
 
-            all
-              .map((p) => p.discovery_method)
-              .filter(Boolean)
+      setYears(
 
-          )].sort()
+        [...new Set(
 
-        );
+          all
+            .map((p) => p.discovery_year)
+            .filter(Boolean)
 
-        setYears(
+        )].sort((a, b) => b - a)
 
-          [...new Set(
+      );
 
-            all
-              .map((p) => p.discovery_year)
-              .filter(Boolean)
-
-          )].sort((a, b) => b - a)
-
-        );
-
-      });
+    });
 
   }, []);
 
@@ -173,11 +167,7 @@ function Explorer() {
 
     if (orderBy === column) {
 
-      setOrder(
-        order === "asc"
-          ? "desc"
-          : "asc"
-      );
+      setOrder(order === "asc" ? "desc" : "asc");
 
     } else {
 
@@ -189,13 +179,16 @@ function Explorer() {
 
   }
 
-  if (loading) {
+  if (initialLoading) {
 
     return (
 
       <LoadingScreen
+
         title="Loading Explorer..."
+
         subtitle="Fetching confirmed exoplanets..."
+
       />
 
     );
@@ -311,9 +304,7 @@ function Explorer() {
 
           startIcon={<DownloadIcon />}
 
-          onClick={() =>
-            exportPlanetsCSV(planets)
-          }
+          onClick={() => exportPlanetsCSV(planets)}
 
           sx={{
 
@@ -338,6 +329,18 @@ function Explorer() {
         </Button>
 
       </Stack>
+
+      {loading && (
+
+        <Box
+          display="flex"
+          justifyContent="center"
+          mb={2}
+        >
+          <CircularProgress size={28} />
+        </Box>
+
+      )}
 
       {planets.length === 0 ? (
 
