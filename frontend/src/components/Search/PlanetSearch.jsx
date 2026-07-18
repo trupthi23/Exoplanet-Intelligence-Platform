@@ -36,7 +36,7 @@ function PlanetSearch() {
           localStorage.getItem(STORAGE_KEY)
         ) || [];
 
-      setOptions(recent);
+      setOptions(Array.isArray(recent) ? recent : []);
 
       return;
 
@@ -55,10 +55,27 @@ function PlanetSearch() {
         })
         .then((res) => {
 
-          setOptions(res.data);
+          // Backend returns:
+          // {
+          //   page,
+          //   total,
+          //   data:[...]
+          // }
+
+          const planets = Array.isArray(res.data?.data)
+            ? res.data.data
+            : [];
+
+          setOptions(planets);
 
         })
-        .catch(console.error)
+        .catch((err) => {
+
+          console.error(err);
+
+          setOptions([]);
+
+        })
         .finally(() => {
 
           setLoading(false);
@@ -77,6 +94,9 @@ function PlanetSearch() {
       JSON.parse(
         localStorage.getItem(STORAGE_KEY)
       ) || [];
+
+    if (!Array.isArray(recent))
+      recent = [];
 
     recent = recent.filter(
       (p) => p.id !== planet.id
@@ -110,20 +130,24 @@ function PlanetSearch() {
       noOptionsText="No planets found"
 
       getOptionLabel={(option) =>
-        option.planet_name || ""
+        option?.planet_name ?? ""
       }
 
-      isOptionEqualToValue={(a, b) =>
-        a.id === b.id
+      isOptionEqualToValue={(option, value) =>
+        option?.id === value?.id
       }
 
-      onInputChange={(e, value) =>
-        setInputValue(value)
-      }
+      onInputChange={(event, newValue) => {
 
-      onChange={(e, planet) => {
+        setInputValue(newValue);
+
+      }}
+
+      onChange={(event, planet) => {
 
         if (!planet) return;
+
+        setValue(planet);
 
         saveRecent(planet);
 
@@ -158,9 +182,11 @@ function PlanetSearch() {
 
             endAdornment: (
               <>
-                {loading &&
-                  <CircularProgress size={18} />
-                }
+                {loading && (
+                  <CircularProgress
+                    size={18}
+                  />
+                )}
 
                 {params.InputProps.endAdornment}
               </>
@@ -185,62 +211,69 @@ function PlanetSearch() {
 
       )}
 
-      renderOption={(props, option) => (
+      renderOption={(props, option) => {
 
-        <li {...props} key={option.id}>
+        if (!option) return null;
 
-          <Box
-            display="flex"
-            alignItems="center"
-            width="100%"
+        return (
+
+          <li
+            {...props}
+            key={option.id}
           >
 
-            {inputValue.length < 2 ? (
+            <Box
+              display="flex"
+              alignItems="center"
+              width="100%"
+            >
 
-              <HistoryIcon
-                sx={{
-                  mr: 1,
-                  color: "#38BDF8",
-                }}
-              />
+              {inputValue.length < 2 ? (
 
-            ) : (
+                <HistoryIcon
+                  sx={{
+                    mr: 1,
+                    color: "#38BDF8",
+                  }}
+                />
 
-              <PublicIcon
-                sx={{
-                  mr: 1,
-                  color: "#22C55E",
-                }}
-              />
+              ) : (
 
-            )}
+                <PublicIcon
+                  sx={{
+                    mr: 1,
+                    color: "#22C55E",
+                  }}
+                />
 
-            <Box>
+              )}
 
-              <Typography
-                fontWeight={600}
-              >
-                {option.planet_name}
-              </Typography>
+              <Box>
 
-              <Typography
-                variant="caption"
-                color="text.secondary"
-              >
+                <Typography
+                  fontWeight={600}
+                >
+                  {option.planet_name}
+                </Typography>
 
-                {option.discovery_method}
-                {" • "}
-                {option.discovery_year}
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                >
+                  {option.discovery_method}
+                  {" • "}
+                  {option.discovery_year}
+                </Typography>
 
-              </Typography>
+              </Box>
 
             </Box>
 
-          </Box>
+          </li>
 
-        </li>
+        );
 
-      )}
+      }}
 
     />
 

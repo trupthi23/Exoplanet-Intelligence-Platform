@@ -343,9 +343,7 @@ function Home() {
 
             </Typography>
 
-            <DiscoveryTimeline
-              data={timeline}
-            />
+            { <DiscoveryTimeline data={timeline} />}
 
           </Paper>
 
@@ -560,7 +558,7 @@ function Home() {
             <AIInsights
               insights={insights}
             />
-            
+
             <MissionControl />
 
           </Paper>
