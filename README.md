@@ -213,3 +213,11 @@ LinkedIn:
 ## 📄 License
 
 This project is licensed under the MIT License.
+
+# 🏗️ System Architecture
+
+The Exoplanet Intelligence Platform follows a modern full-stack architecture consisting of a React frontend, FastAPI backend, PostgreSQL database, and Machine Learning modules for habitability analysis.
+
+<p align="center">
+  <img src="docs/architecture.png" width="1000"/>
+</p>
