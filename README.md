@@ -687,14 +687,11 @@ This project strengthened practical experience in multiple domains of software e
 
 The platform is designed to be extensible. Planned enhancements include:
 
-- AI-powered planet recommendation engine
 - Machine learning habitability prediction model
-- Planet comparison dashboard
 - Interactive galaxy visualization
 - NASA live API integration
 - User authentication and saved favorites
 - Dark/Light theme switching
-- Downloadable PDF scientific reports
 - Advanced filtering with multiple criteria
 - Planet bookmarking and collections
 - Exoplanet discovery notifications
@@ -757,19 +754,13 @@ Passionate about:
 - Machine Learning
 - Artificial Intelligence
 - Data Visualization
-- Full-Stack Development
 - Space Technology
-- Scientific Analytics
 
 ### Connect with me
 
 **GitHub**
 
 https://github.com/trupthi23
-
-**LinkedIn**
-
-https://www.linkedin.com/in/trupthi-k-b
 
 ---
 
