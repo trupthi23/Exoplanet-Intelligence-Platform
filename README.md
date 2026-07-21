@@ -784,6 +784,6 @@ It helps others discover the project and motivates future improvements.
 
 ### 🚀 Built with React • FastAPI • PostgreSQL • Material UI • Recharts • NASA Exoplanet Archive
 
-**Made with ❤️ by Trupthi K B**
+**Made by Trupthi K B**
 
 </p>
