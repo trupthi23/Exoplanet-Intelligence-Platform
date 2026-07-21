@@ -359,12 +359,12 @@ The AI Observatory transforms raw exoplanet data into meaningful scientific insi
 
 <p align="center">
 
-<img src="docs/images/ai/ai-insights.png" width="950"/>
+<img src="docs/images/ai-insights/ai-insights.png" width="950"/>
 
 <br><br>
 
-<img src="docs/images/ai/ai-insights1.png" width="48%"/>
-<img src="docs/images/ai/ai-insights2.png" width="48%"/>
+<img src="docs/images/ai-insights/ai-insights1.png" width="48%"/>
+<img src="docs/images/ai-insights/ai-insights2.png" width="48%"/>
 
 </p>
 
